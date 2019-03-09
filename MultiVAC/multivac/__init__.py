@@ -7,8 +7,12 @@ from flask.ext.debugtoolbar import DebugToolbarExtension
 
 
 def create_app(config_object=None, db_name=None):  # pragma: no cover
+    app_settings = os.getenv('APP_SETTINGS')
     from dotenv import load_dotenv
-    load_dotenv(".env")
+    if app_settings:
+        load_dotenv(app_settings)
+    else:
+        load_dotenv('development.env')
     app = Flask(__name__, static_url_path=os.environ.get("STATIC_URL"))
     if config_object is None:
         app.config.from_object('config.BaseConfiguration')
@@ -24,7 +28,7 @@ def create_app(config_object=None, db_name=None):  # pragma: no cover
             os.environ.get("PROFILER", "False") == 'True'
         app.config['RQ_DEFAULT_URL'] = os.environ.get("REDIS_URL")
     else:
-        app.logger.setLevel("DEBUG")
+        app.logger.setLevel("INFO")
     RQ(app)
     Bootstrap(app)
     DebugToolbarExtension(app)

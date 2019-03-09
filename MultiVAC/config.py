@@ -10,7 +10,7 @@ log.setLevel(logging.DEBUG)
 class BaseConfiguration(object):
     APP_ENV = os.environ.get("APP_ENV")
     WTF_CSRF_ENABLED = False
-    DEBUG = os.environ.get("DEBUG_MODE") == "True"
+    DEBUG = os.environ.get("DEBUG_MODE")
     MONGODB_URL = os.environ.get("MONGO_URL")
 
     SECRET_KEY = os.environ.get("SECRET_KEY")
@@ -33,14 +33,14 @@ def get_env_var(varname):
     import os
     from dotenv import load_dotenv
 
-    load_dotenv('.env')
+    load_dotenv(varname)
 
     return os.environ.get(varname)
 
 
 def get_redis_connection():
     # Redis connection
-    r = get_env_var("REDIS_URL")
+    r = os.environ.get("REDIS_URL")
     redis_connection = redis.from_url(r)
 
     return redis_connection

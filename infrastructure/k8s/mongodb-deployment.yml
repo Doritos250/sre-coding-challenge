@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: mongo
+  labels:
+    role: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      environment: production
+      role: mongo
+  serviceName: mongo
+  template:
+    metadata:
+      labels:
+        environment: production
+        role: mongo
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo
+          image: mongo
+          command: [mongod]
+          args: ["--replSet", "rs0", "--smallfiles", "--noprealloc", "--bind_ip_all"]
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+          - name: mongo-persistent-storage
+            mountPath: /data/db
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mondodb-credentials
+                  key: user
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mondodb-credentials
+                  key: password
+
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-persistent-storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: fast
+    spec:
+      accessModes: [ ReadWriteOnce ]
+      resources:
+        requests:
+          storage: 10Gi

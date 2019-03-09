@@ -1,0 +1,40 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: flask-worker
+  namespace: default
+  labels:
+    app: flask-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask-worker
+  template:
+    metadata:
+      labels:
+        app: flask-worker
+    spec:
+      containers:
+      - name: multivac-worker
+        image: gcr.io/unbabel-sre-theo/multivac:latest
+        imagePullPolicy: Always
+        command: ["python", "manage.py"]
+        args: ["worker"]
+        env:
+        - name: FLASK_ENV
+          valueFrom:
+            configMapKeyRef:
+              key: FLASK_ENV
+              name: flask-config
+        - name: APP_SETTINGS
+          valueFrom:
+            configMapKeyRef:
+              key: APP_SETTINGS
+              name: flask-config
+        - name: MONGO_URL
+          valueFrom:
+            secretKeyRef:
+              name: mondodb-credentials
+              key: url
