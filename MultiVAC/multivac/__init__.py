@@ -1,9 +1,10 @@
 import os
 from logging import StreamHandler
+
 from flask import Flask
-from flask.ext.rq import RQ
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.debugtoolbar import DebugToolbarExtension
+from flask.ext.rq import RQ
 
 
 def create_app(config_object=None, db_name=None):  # pragma: no cover

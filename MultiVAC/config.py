@@ -1,7 +1,8 @@
+import logging
 import os
+
 import redis
 from pymongo import MongoClient
-import logging
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)

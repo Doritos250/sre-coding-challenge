@@ -1,12 +1,10 @@
 import json
 import logging
-from rq import Queue
+
 from config import get_multivac_db, get_redis_connection
+from flask import Blueprint, request, Response
 from multivac.process_data import process_data
-from flask import Blueprint, request, Response, redirect, url_for
-
-
-
+from rq import Queue
 
 db = get_multivac_db()
 redis_connection = get_redis_connection()
@@ -29,7 +27,6 @@ def homepage():
 
 @multivac_bp.route("/multivac", methods=['GET'])
 def get_multivac():
-
     n_answer = db.entropy.find().count()
     if n_answer == 0:
         return "INSUFFICIENT DATA FOR MEANINGFUL ANSWER."
@@ -43,7 +40,7 @@ def post_multivac():
     value = request.form['data']
 
     q = Queue("default", connection=redis_connection)
-    q.enqueue_call(process_data, args=(value, ))
+    q.enqueue_call(process_data, args=(value,))
 
     return Response(response=json.dumps({"response": "MultiVAC updated!"}),
                     status=200, mimetype="application/json")

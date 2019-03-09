@@ -1,7 +1,7 @@
 import sys
+
 from flask import url_for
 from flask.ext.script import Manager, Command, Option, Server
-
 from multivac import create_app
 
 app = create_app()
@@ -26,9 +26,10 @@ def list_routes():
 
         methods = ','.join(rule.methods)
         url = url_for(rule.endpoint, **options)
-        line = urllib.unquote("{:50s} {:20s} {}".format(
+        line = urllib.parse.unquote("{:50s} {:20s} {}".format(
             rule.endpoint, methods, url))
         output.append(line)
+        print(line)
 
 
 class Test(Command):
@@ -44,7 +45,6 @@ class Test(Command):
 
 
 if __name__ == "__main__":
-
     manager.add_command('test', Test())
     manager.add_command('runserver', Server('0.0.0.0', port=5000))
     manager.run()
