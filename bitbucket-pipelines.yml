@@ -9,9 +9,22 @@ pipelines:
         script:
           - bash -c "cd application && pip install -r requirements.txt"
           - bash -c "cd application && python3 manage.py test"
+        services:
+          - redis
+          - mongo
 
   branches:
     master:
+      - step:
+          name: Flask Unit Tests
+          caches:
+            - pip
+          script:
+            - bash -c "cd application && pip install -r requirements.txt"
+            - bash -c "cd application && python3 manage.py test"
+          services:
+            - redis
+            - mongo
       - step:
           name: Deploy Flask App & Worker to production
           deployment: production
@@ -20,14 +33,19 @@ pipelines:
           script:
             - echo $GCLOUD_UNBABEL_SERVICE_ACCOUNT | base64 --decode --ignore-garbage > ./gcloud-api-key.json
             - gcloud auth activate-service-account --key-file gcloud-api-key.json
-            - bash -c "cd application && gcloud builds submit --tag gcr.io/unbabel-sre-theo/multivac ."
+            - gcloud container clusters get-credentials $KUBE_CLUSTER --region $KUBE_REGION
+            - bash -c "cd application && gcloud builds submit --tag gcr.io/unbabel-sre-theo/multivac:$BITBUCKET_BUILD_NUMBER ."
+            - kubectl set image deploy/flask multivac-flask=gcr.io/unbabel-sre-theo/multivac:$BITBUCKET_BUILD_NUMBER
+            - kubectl set image deploy/worker multivac-worker=gcr.io/unbabel-sre-theo/multivac:$BITBUCKET_BUILD_NUMBER
+            - kubectl rollout status deployment flask
+            - kubectl rollout status deployment worker
 
 definitions:
   services:
     redis:
       image: redis:3.2
-    mysql:
-      image: bitnami/mongodb:4.1.8
+    mongo:
+      image: bitnami/mongodb:4.0
       variables:
         MONGODB_DATABASE: multivac
         MONGODB_USERNAME: multivac
