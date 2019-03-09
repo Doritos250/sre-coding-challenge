@@ -3,7 +3,6 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: flask
-  namespace: default
   labels:
     app: flask
 spec:
@@ -19,17 +18,26 @@ spec:
       containers:
       - name: multivac-flask
         image: gcr.io/unbabel-sre-theo/multivac:latest
-        imagePullPolicy: Always
         env:
         - name: FLASK_ENV
           valueFrom:
             configMapKeyRef:
-              key: FLASK_ENV
+              key: env
               name: flask-config
         - name: APP_SETTINGS
           valueFrom:
             configMapKeyRef:
-              key: APP_SETTINGS
+              key: app.settings
+              name: flask-config
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              key: redis.url
+              name: flask-config
+        - name: SECRET_KEY
+          valueFrom:
+            configMapKeyRef:
+              key: secret.key
               name: flask-config
         - name: MONGO_URL
           valueFrom:

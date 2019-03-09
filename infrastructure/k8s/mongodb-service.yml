@@ -4,11 +4,11 @@ kind: Service
 metadata:
   name: mongo
   labels:
-   name: mongo
+    role: db
 spec:
   ports:
   - port: 27017
     targetPort: 27017
   clusterIP: None
   selector:
-    role: mongo
+    role: db
